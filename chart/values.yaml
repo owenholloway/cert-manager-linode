@@ -5,7 +5,7 @@ certManager:
   serviceAccountName: cert-manager
 
 image:
-  repository: monostream/cert-manager-linode
+  repository: lanceolata/cert-manager-linode
   tag: latest
   pullPolicy: Always
 
