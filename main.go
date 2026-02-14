@@ -9,14 +9,14 @@ import (
 	"os"
 	"strings"
 
-	"golang.org/x/oauth2"
-
-	acme "github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
-	"github.com/cert-manager/cert-manager/pkg/acme/webhook/cmd"
-	"github.com/linode/linodego"
-
-	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	extapi "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/client-go/rest"
+
+	"github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
+	"github.com/cert-manager/cert-manager/pkg/acme/webhook/cmd"
+
+	"github.com/linode/linodego"
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -49,7 +49,7 @@ func (s *linodeSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan s
 	return nil
 }
 
-func (s *linodeSolver) Present(ch *acme.ChallengeRequest) error {
+func (s *linodeSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 	c, err := clientFromRequest(ch)
 
 	if err != nil {
@@ -97,7 +97,7 @@ func (s *linodeSolver) Present(ch *acme.ChallengeRequest) error {
 	return err
 }
 
-func (s *linodeSolver) CleanUp(ch *acme.ChallengeRequest) error {
+func (s *linodeSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 	c, err := clientFromRequest(ch)
 
 	if err != nil {
@@ -117,7 +117,7 @@ func (s *linodeSolver) CleanUp(ch *acme.ChallengeRequest) error {
 	return c.DeleteDomainRecord(context.Background(), domain.ID, record.ID)
 }
 
-func loadConfig(cfgJSON *v1.JSON) (linodeConfig, error) {
+func loadConfig(cfgJSON *extapi.JSON) (linodeConfig, error) {
 	cfg := linodeConfig{}
 
 	if cfgJSON == nil {
@@ -131,7 +131,7 @@ func loadConfig(cfgJSON *v1.JSON) (linodeConfig, error) {
 	return cfg, nil
 }
 
-func clientFromRequest(ch *acme.ChallengeRequest) (*linodego.Client, error) {
+func clientFromRequest(ch *v1alpha1.ChallengeRequest) (*linodego.Client, error) {
 	cfg, err := loadConfig(ch.Config)
 
 	if err != nil {
