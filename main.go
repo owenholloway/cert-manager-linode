@@ -63,6 +63,8 @@ func (s *linodeSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 	priority := 0
 
 	if err == nil {
+		println("UpdateDomainRecord ", ch.ResolvedFQDN, ": ", ch.Key, ": ", record.Type)
+
 		_, err = c.UpdateDomainRecord(context.Background(), domain.ID, record.ID, linodego.DomainRecordUpdateOptions{
 			Type: record.Type,
 			Name: record.Name,
@@ -78,9 +80,13 @@ func (s *linodeSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 		return err
 	}
 
+	println("error", err.Error())
+
 	if domain == nil {
 		return errors.New("domain not found")
 	}
+
+	println("CreateDomainRecord ", ch.ResolvedFQDN, ": ", ch.Key)
 
 	_, err = c.CreateDomainRecord(context.Background(), domain.ID, linodego.DomainRecordCreateOptions{
 		Type: linodego.RecordTypeTXT,
@@ -90,7 +96,7 @@ func (s *linodeSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 		Weight: &weight,
 		Port:   &port,
 
-		TTLSec:   180,
+		TTLSec:   10,
 		Priority: &priority,
 	})
 
